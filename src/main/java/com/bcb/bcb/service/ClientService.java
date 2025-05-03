@@ -3,10 +3,18 @@ package com.bcb.bcb.service;
 import com.bcb.bcb.dto.request.ClientRequestDTO;
 import com.bcb.bcb.dto.response.ClientResponseDTO;
 import com.bcb.bcb.entity.Client;
+import com.bcb.bcb.enums.DocumentEnum;
+import com.bcb.bcb.enums.PlanEnum;
 import com.bcb.bcb.exception.ClientNotFoundException;
+import com.bcb.bcb.exception.InvalidDocumentException;
 import com.bcb.bcb.repository.ClientRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ClientService {
@@ -17,16 +25,16 @@ public class ClientService {
         this.clientRepository = clientRepository;
     }
 
-//    public List<ClientResponseDTO> findAll(List page) {
-//        List<ClientResponseDTO> clientResponse = new ArrayList<>();
-//
-//        List<Client> client = clientRepository.findAll(page);
-//        client.forEach(pessoa -> clientResponse.add(clientEntityToDto(pessoa)));
-//
-//        return  new PageImpl<>(clientResponse, page, client.getTotalElements()) ;
-//
-//    }
-//
+    public List<ClientResponseDTO> findAll() {
+        List<ClientResponseDTO> clientResponse = new ArrayList<>();
+
+        List<Client> client = clientRepository.findAll();
+        client.forEach(c -> clientResponse.add(ClientResponseDTO.fromEntity((c))));
+
+        return clientResponse ;
+
+    }
+
     public ClientResponseDTO findById(Long id) {
         final Client client = getClientById(id);
         return  ClientResponseDTO.fromEntity(client);
@@ -39,31 +47,42 @@ public class ClientService {
     }
 
 
-//    @Transactional
-//    public ClientResponseDTO updateClient(ClientRequestDTO pessoaRequestDTO, Long id) {
-//        final Client client = getClientById(id);
-//        final Client clientUpdated = updateContentClientDtoToEntity(pessoaRequestDTO, client);
-//
-//        return clientEntityToDto(clientRepository.save(clientUpdated));
-//    }
-//
-//    @Transactional
-//    public void deleteClient(Long id) {
-//        final Client pessoa = getClientById(id);
-//        clientRepository.delete(pessoa);
-//    }
-//
-//    private Client updateContentClientDtoToEntity(ClientRequestDTO clientRequestDTO, Client client) {
-//
-//        Optional.ofNullable(clientRequestDTO.getName()).ifPresent(client::setName);
-//        Optional.ofNullable(clientRequestDTO.getCpf()).ifPresent(client::setCpf);
-//        Optional.ofNullable(clientRequestDTO.getCompanyName()).ifPresent(client::setCompanyName);
-//        Optional.ofNullable(clientRequestDTO.getCnpj()).ifPresent(client::setCnpj);
-//        Optional.ofNullable(clientRequestDTO.getPhoneNumber()).ifPresent(client::setPhoneNumber);
-//
-//        return client;
-//    }
-//
+    @Transactional
+    public ClientResponseDTO updateClient(ClientRequestDTO pessoaRequestDTO, Long id) {
+        final Client client = getClientById(id);
+        final Client clientUpdated = updateContentClientDtoToEntity(pessoaRequestDTO, client);
+
+        return ClientResponseDTO.fromEntity(clientRepository.save(clientUpdated));
+    }
+
+    private Client updateContentClientDtoToEntity(ClientRequestDTO dto, Client client) {
+
+        Optional.ofNullable(dto.getName()).ifPresent(client::setName);
+
+        if (dto.getDocumentId() != null && dto.getDocumentType() != null) {
+            DocumentEnum documentType = DocumentEnum.fromCode(dto.getDocumentType());
+
+            if (!documentType.isValid(dto.getDocumentId())) {
+                throw new InvalidDocumentException(dto.getDocumentType());
+            }
+
+            client.setDocumentId(dto.getDocumentId());
+            client.setDocumentType(documentType);
+        }
+
+        Optional.ofNullable(dto.getPlanType()).map(PlanEnum::valueOf).ifPresent(client::setPlanType);
+        Optional.ofNullable(dto.getBalance()).ifPresent(client::setBalance);
+        Optional.ofNullable(dto.getLimit()).ifPresent(client::setLimitBalance);
+        Optional.ofNullable(dto.getActive()).ifPresent(client::setActive);
+
+        return client;
+    }
+
+    public BigDecimal getBalanceClient(Long id) {
+        final Client client = getClientById(id);
+        return client.getBalanceValue();
+    }
+
     private Client getClientById(Long id) {
         return clientRepository.findById(id).orElseThrow(() -> new ClientNotFoundException());
     }

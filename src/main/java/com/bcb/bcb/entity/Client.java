@@ -56,4 +56,9 @@ public class Client extends BaseEntity {
                 .active(dto.getActive())
                 .build();
     }
+
+    public BigDecimal getBalanceValue() {
+        if(PlanEnum.POSPAID.equals(this.getPlanType())) return this.getBalance();
+        return this.getLimitBalance();
+    }
 }

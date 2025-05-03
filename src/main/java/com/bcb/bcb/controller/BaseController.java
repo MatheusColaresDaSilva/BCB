@@ -26,4 +26,10 @@ public abstract class BaseController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseDTO.withErro(erroResponseDTO));
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ResponseDTO<Object>> handleException(Exception ex) {
+        var erroResponseDTO = new ErroResponseDTO(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseDTO.withErro(erroResponseDTO));
+    }
 }
