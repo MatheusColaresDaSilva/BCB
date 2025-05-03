@@ -28,6 +28,10 @@ public class DeadLetterQueue implements MessageQueueStrategy{
         return messageQueue.isEmpty();
     }
 
+    public int size() {
+        return messageQueue.size();
+    }
+
     public String print() {
 
         List<Message> orderedMessages = new ArrayList<>(messageQueue);

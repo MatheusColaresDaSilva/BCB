@@ -1,5 +1,6 @@
 package com.bcb.bcb.queue;
 
+import com.bcb.bcb.dto.response.StatusQueueDTO;
 import com.bcb.bcb.entity.Message;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,10 @@ public class PriorityMessageQueue implements MessageQueueStrategy{
         return messageQueue.isEmpty();
     }
 
+    public int size() {
+        return messageQueue.size();
+    }
+
     public String print() {
 
         List<Message> orderedMessages = new ArrayList<>(messageQueue);
@@ -39,5 +44,10 @@ public class PriorityMessageQueue implements MessageQueueStrategy{
 
         return builder.toString();
 
+    }
+
+    @Override
+    public StatusQueueDTO status() {
+        return StatusQueueDTO.builder().size(this.size()).build();
     }
 }

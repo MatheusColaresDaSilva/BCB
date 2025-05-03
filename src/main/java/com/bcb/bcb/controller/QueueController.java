@@ -1,6 +1,8 @@
 package com.bcb.bcb.controller;
 
 
+import com.bcb.bcb.dto.response.ResponseDTO;
+import com.bcb.bcb.dto.response.StatusQueueDTO;
 import com.bcb.bcb.queue.MessageQueueFactory;
 import com.bcb.bcb.queue.MessageQueueStrategy;
 import com.bcb.bcb.service.QueueService;
@@ -22,6 +24,13 @@ public class QueueController extends BaseController{
 
         MessageQueueStrategy queue = messageQueueFactory.getQueue(type.toLowerCase());
         return ResponseEntity.ok(queue.print());
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<ResponseDTO<StatusQueueDTO>> getStatus(@RequestParam String type) {
+
+        MessageQueueStrategy queue = messageQueueFactory.getQueue(type.toLowerCase());
+        return ResponseEntity.ok(new ResponseDTO<>(queue.status()));
     }
 
     @PostMapping("/process")
