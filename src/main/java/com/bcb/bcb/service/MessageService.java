@@ -7,9 +7,8 @@ import com.bcb.bcb.entity.Conversation;
 import com.bcb.bcb.entity.Message;
 import com.bcb.bcb.enums.PriorityEnum;
 import com.bcb.bcb.enums.StatusMessageEnum;
-import com.bcb.bcb.exception.ClientNotFoundException;
 import com.bcb.bcb.exception.MessageNotFoundException;
-import com.bcb.bcb.repository.ClientRepository;
+import com.bcb.bcb.queue.PriorityMessageQueue;
 import com.bcb.bcb.repository.ConversationRepository;
 import com.bcb.bcb.repository.MessageRepository;
 import com.bcb.bcb.specification.builder.MessageSpecificationsBuilder;
@@ -17,17 +16,12 @@ import com.bcb.bcb.utils.SecurityUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -36,6 +30,7 @@ public class MessageService {
     private MessageRepository messageRepository;
     private ConversationRepository conversationRepository;
     private ClientService clientService;
+    private PriorityMessageQueue priorityMessageQueue;
 
     @Transactional
     public MessageResponseDTO sendMessage(MessageRequestDTO messageRequestDTO) {
@@ -62,6 +57,8 @@ public class MessageService {
         message.setCost(cost);
 
         messageRepository.save(message);
+
+        priorityMessageQueue.addMessage(message);
 
         return new MessageResponseDTO(
                 message.getId(),

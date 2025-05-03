@@ -4,8 +4,6 @@ package com.bcb.bcb.controller;
 import com.bcb.bcb.dto.request.MessageRequestDTO;
 import com.bcb.bcb.dto.response.MessageResponseDTO;
 import com.bcb.bcb.dto.response.ResponseDTO;
-import com.bcb.bcb.enums.PriorityEnum;
-import com.bcb.bcb.enums.StatusMessageEnum;
 import com.bcb.bcb.service.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;

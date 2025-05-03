@@ -4,10 +4,7 @@ package com.bcb.bcb.entity;
 import com.bcb.bcb.enums.PriorityEnum;
 import com.bcb.bcb.enums.StatusMessageEnum;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -50,4 +47,17 @@ public class Message extends BaseEntity {
     private BigDecimal cost;
 
 
+    @Override
+    public String toString() {
+        return "Message{" +
+                " conversationId=" + (conversation != null ? conversation.getId() : "null") +
+                ", sender=" + (sender != null ? sender.getName() : "null") +
+                ", recipient=" + (recipient != null ? recipient.getName() : "null") +
+                ", content='" + content + '\'' +
+                ", timestamp=" + timestamp +
+                ", priority=" + priority +
+                ", status=" + status +
+                ", cost=" + cost +
+                '}';
+    }
 }
