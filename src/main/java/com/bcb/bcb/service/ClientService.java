@@ -80,7 +80,7 @@ public class ClientService {
 
     public BigDecimal getBalanceClient(Long id) {
         final Client client = getClientById(id);
-        return client.getBalanceValue();
+        return client.getAvailableBalance();
     }
 
     public Client getClientById(Long id) {

@@ -3,6 +3,7 @@ package com.bcb.bcb.entity;
 import com.bcb.bcb.dto.request.ClientRequestDTO;
 import com.bcb.bcb.enums.DocumentEnum;
 import com.bcb.bcb.enums.PlanEnum;
+import com.bcb.bcb.exception.InsufficientBalanceException;
 import com.bcb.bcb.exception.InvalidDocumentException;
 import jakarta.persistence.*;
 import lombok.*;
@@ -57,12 +58,29 @@ public class Client extends BaseEntity {
                 .build();
     }
 
-    public BigDecimal getBalanceValue() {
-        if(!isPrePaid()) return this.getBalance();
+    public BigDecimal getAvailableBalance() {
+        if(isPrePaid()) return this.getBalance();
         return this.getLimitBalance();
     }
 
     public Boolean isPrePaid() {
         return PlanEnum.PREPAID.equals(this.getPlanType());
+    }
+
+    public Boolean canAfford(BigDecimal cost) {
+        return getAvailableBalance().compareTo(cost) >= 0;
+    }
+
+    public void debitAmount(BigDecimal amount) {
+        if (canAfford(amount)) {
+            BigDecimal newBalance = getAvailableBalance().subtract(amount);
+            if (isPrePaid()) {
+                setBalance(newBalance);
+            } else {
+                setLimitBalance(newBalance);
+            }
+        } else {
+            throw new InsufficientBalanceException();
+        }
     }
 }

@@ -7,13 +7,12 @@ import com.bcb.bcb.entity.Conversation;
 import com.bcb.bcb.entity.Message;
 import com.bcb.bcb.enums.PriorityEnum;
 import com.bcb.bcb.enums.StatusMessageEnum;
+import com.bcb.bcb.exception.InsufficientBalanceException;
 import com.bcb.bcb.exception.MessageNotFoundException;
 import com.bcb.bcb.queue.PriorityMessageQueue;
-import com.bcb.bcb.repository.ConversationRepository;
 import com.bcb.bcb.repository.MessageRepository;
 import com.bcb.bcb.specification.builder.MessageSpecificationsBuilder;
 import com.bcb.bcb.utils.SecurityUtils;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ import java.util.List;
 public class MessageService {
 
     private MessageRepository messageRepository;
-    private ConversationRepository conversationRepository;
+    private ConversationService conversationService;
     private ClientService clientService;
     private PriorityMessageQueue priorityMessageQueue;
 
@@ -40,48 +39,39 @@ public class MessageService {
 
         Client recipient = clientService.getClientById(messageRequestDTO.getRecipientId());
 
-        Conversation conversation = resolveConversation(messageRequestDTO.getConversationId(), sender, recipient);
+        Conversation conversation = conversationService.resolveConversation(messageRequestDTO.getConversationId(), sender, recipient);
 
         PriorityEnum priority = PriorityEnum.valueOf(messageRequestDTO.getPriority().toUpperCase());
 
-        BigDecimal cost = priority == PriorityEnum.URGENT ? new BigDecimal("0.50") : new BigDecimal("0.25");
+        BigDecimal cost = priority.getCost();
 
-        Message message = new Message();
-        message.setConversation(conversation);
-        message.setSender(sender);
-        message.setRecipient(recipient);
-        message.setContent(messageRequestDTO.getContent());
-        message.setTimestamp(LocalDateTime.now());
-        message.setPriority(priority);
-        message.setStatus(StatusMessageEnum.QUEUED);
-        message.setCost(cost);
+        if(sender.canAfford(cost)) {
+            Message message = new Message();
+            message.setConversation(conversation);
+            message.setSender(sender);
+            message.setRecipient(recipient);
+            message.setContent(messageRequestDTO.getContent());
+            message.setTimestamp(LocalDateTime.now());
+            message.setPriority(priority);
+            message.setStatus(StatusMessageEnum.QUEUED);
+            message.setCost(priority.getCost());
 
-        messageRepository.save(message);
+            messageRepository.save(message);
 
-        priorityMessageQueue.addMessage(message);
+            priorityMessageQueue.addMessage(message);
 
-        return new MessageResponseDTO(
-                message.getId(),
-                message.getStatus().name().toLowerCase(),
-                message.getTimestamp(),
-                message.getCost(),
-                sender.getBalance() != null ? sender.getBalance().subtract(cost) : null
-        );
-    }
-
-
-    private Conversation resolveConversation(Long conversationId, Client sender, Client recipient) {
-        if (conversationId != null) {
-            return conversationRepository.findById(conversationId)
-                    .orElseThrow(() -> new EntityNotFoundException("Conversa não encontrada"));
+            return new MessageResponseDTO(
+                    message.getId(),
+                    message.getStatus().name().toLowerCase(),
+                    message.getTimestamp(),
+                    message.getCost(),
+                    sender.getAvailableBalance().subtract(cost)
+            );
+        } else {
+            throw new InsufficientBalanceException();
         }
 
-        Conversation newConversation = new Conversation();
-        newConversation.setClient(sender);
-        newConversation.setRecipient(recipient);
-        return conversationRepository.save(newConversation);
     }
-
 
     public List<MessageResponseDTO> listMessagesWithFilters(String search) {
         MessageSpecificationsBuilder builder = new MessageSpecificationsBuilder();
