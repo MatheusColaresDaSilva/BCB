@@ -83,7 +83,7 @@ public class ClientService {
         return client.getBalanceValue();
     }
 
-    private Client getClientById(Long id) {
+    public Client getClientById(Long id) {
         return clientRepository.findById(id).orElseThrow(() -> new ClientNotFoundException());
     }
 

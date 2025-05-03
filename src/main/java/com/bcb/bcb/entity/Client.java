@@ -58,7 +58,11 @@ public class Client extends BaseEntity {
     }
 
     public BigDecimal getBalanceValue() {
-        if(PlanEnum.POSPAID.equals(this.getPlanType())) return this.getBalance();
+        if(!isPrePaid()) return this.getBalance();
         return this.getLimitBalance();
+    }
+
+    public Boolean isPrePaid() {
+        return PlanEnum.PREPAID.equals(this.getPlanType());
     }
 }
