@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 @Component
-@Qualifier("priorityQueue")
-public class PriorityMessageQueue implements MessageQueueStrategy{
+@Qualifier("readedQueue")
+public class ReadedQueue implements MessageQueueStrategy{
 
     PriorityQueue<Message> messageQueue = new PriorityQueue<>(new MessageComparable());
 

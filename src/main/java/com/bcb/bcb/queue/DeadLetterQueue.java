@@ -1,6 +1,7 @@
 package com.bcb.bcb.queue;
 
 import com.bcb.bcb.entity.Message;
+import com.bcb.bcb.enums.StatusMessageEnum;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -9,12 +10,13 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 @Component
-@Qualifier("priorityQueue")
-public class PriorityMessageQueue implements MessageQueueStrategy{
+@Qualifier("deadLetterQueue")
+public class DeadLetterQueue implements MessageQueueStrategy{
 
     PriorityQueue<Message> messageQueue = new PriorityQueue<>(new MessageComparable());
 
     public void addMessage(Message message) {
+        message.setStatus(StatusMessageEnum.FAILED);
         messageQueue.add(message);
     }
 
