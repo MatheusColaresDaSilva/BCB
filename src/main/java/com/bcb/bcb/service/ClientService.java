@@ -42,6 +42,7 @@ public class ClientService {
 
     @Transactional
     public ClientResponseDTO createClient(ClientRequestDTO clientRequestDTO) {
+        validateCreate(clientRequestDTO);
         var client = Client.fromDTO(clientRequestDTO);
         return ClientResponseDTO.fromEntity(clientRepository.save(client));
     }
@@ -90,6 +91,20 @@ public class ClientService {
 
     public Client getClientByDocument(String documentId) {
         return clientRepository.findByDocumentId(documentId).orElseThrow(() -> new ClientNotFoundException());
+    }
+
+    public void validateCreate(ClientRequestDTO dto) {
+        PlanEnum plan = PlanEnum.valueOf(dto.getPlanType());
+
+        if (PlanEnum.PREPAID.equals(plan)) {
+            if (dto.getBalance() == null || dto.getLimit() != null) {
+                throw new IllegalArgumentException("For PREPAID, balance must be informed and limit null.");
+            }
+        } else if (PlanEnum.POSPAID.equals(plan)) {
+            if (dto.getLimit() == null || dto.getBalance() != null) {
+                throw new IllegalArgumentException("For POSTPAID, limit must be informed and balance null.");
+            }
+        }
     }
 
 }

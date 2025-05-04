@@ -1,0 +1,54 @@
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.named("test") {
+    finalizedBy(tasks.named("jacocoTestReport"))
+}
+
+tasks.named("jacocoTestReport") {
+    dependsOn(tasks.named("test"))
+
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+    }
+}
+
+tasks.named("jacocoTestReport").configure {
+    classDirectories.setFrom(
+            files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: ['**/BcbApplication.class'])
+            })
+    )
+}
+
+tasks.named("jacocoTestCoverageVerification") {
+    dependsOn(tasks.named("jacocoTestReport"))
+
+    violationRules {
+        rule {
+            limit {
+                counter = 'INSTRUCTION'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+        }
+    }
+}
+
+tasks.named("jacocoTestCoverageVerification").configure {
+    classDirectories.setFrom(
+            files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: ['**/BcbApplication.class'])
+            })
+    )
+}
