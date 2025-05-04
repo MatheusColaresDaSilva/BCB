@@ -10,6 +10,7 @@ Este projeto é uma API RESTful desenvolvida com Java e Spring Boot para o envio
 - Java 17  
 - Spring Boot  
 - Spring Data JPA  
+- Spring Security
 - Hibernate  
 - Lombok  
 - PostgreSQL  
@@ -28,31 +29,26 @@ git clone https://github.com/seu-usuario/seu-repo.git
 cd seu-repo
 ```
 
-2. **Executar com Maven (sem Docker):**
+2. **Construir a aplicação e subir os containers com Docker Compose:**
+
+Execute o comando abaixo para construir o projeto e subir os containers:
 
 ```bash
-./mvnw spring-boot:run
+docker-compose up --build -d
 ```
 
-3. **(Opcional) Compilar o projeto:**
+Isso vai:
+- Construir a aplicação usando o `Dockerfile`.
+- Subir o container da aplicação (com a API) e o container do PostgreSQL.
+- Subir a aplicação na porta 8080 e o banco de dados na porta 5432.
 
-```bash
-./mvnw clean install
-```
+3. **Acessar Swagger UI:**
 
-4. **Swagger UI:**
-
-Acesse via navegador:
+Depois de subir os containers, acesse o Swagger UI via navegador:
 
 ```
 http://localhost:8080/swagger-ui.html
 ```
-
-5. **(Futuro) Docker Compose:**
-
-Em breve será incluído um `docker-compose.yml` para facilitar a execução com PostgreSQL + aplicação containerizada.
-
----
 
 ## 🧠 Decisões Técnicas e Limitações
 
@@ -88,3 +84,15 @@ Em breve será incluído um `docker-compose.yml` para facilitar a execução com
   - Inserção de mensagens com ordenação automática  
   - Execução assíncrona da fila via endpoint `/api/v1/queue/process`  
   - Impressão e status das filas disponíveis  
+
+---
+
+## 🔑 Autenticação
+
+A autenticação inicial para o sistema é feita via **Basic Auth**. O usuário admin pode ser utilizado para autenticar e chamar os endpoints necessários para criação de clientes.
+
+**Credenciais:**
+- **Usuário**: `1`
+- **Senha**: `password`
+
+Isso é para criar o primeiro Client pelo endpoint. Depois disso vc pode pegar o número do Documento do Cliente e usar pra chamar o /auth e pegar o token!
