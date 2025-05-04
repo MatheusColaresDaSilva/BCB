@@ -15,6 +15,21 @@ services:
     networks:
       - backend
 
+  bcb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bcb
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_db:5432/cbc_db
+      SPRING_DATASOURCE_USERNAME: cbc_user
+      SPRING_DATASOURCE_PASSWORD: cbc_pass
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - backend
 volumes:
   pgdata:
 
