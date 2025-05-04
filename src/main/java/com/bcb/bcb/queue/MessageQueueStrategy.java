@@ -5,6 +5,7 @@ import com.bcb.bcb.entity.Message;
 
 public interface MessageQueueStrategy {
     Message pollMessage();
+    Message peekMessage();
     void addMessage(Message message);
     int size();
     String print();

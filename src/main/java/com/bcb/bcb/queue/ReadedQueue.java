@@ -22,6 +22,10 @@ public class ReadedQueue implements MessageQueueStrategy{
         return messageQueue.poll();
     }
 
+    public Message peekMessage() {
+        return messageQueue.peek();
+    }
+
     public boolean isEmpty() {
         return messageQueue.isEmpty();
     }
