@@ -31,7 +31,7 @@ cd seu-repo
 
 2. **Construir a aplicação e subir os containers com Docker Compose:**
 
-Execute o comando abaixo para construir o projeto e subir os containers:
+Build o projeto para ele gerar o artefato e em seguida execute o comando abaixo para construir o projeto e subir os containers:
 
 ```bash
 docker-compose up --build -d
