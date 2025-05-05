@@ -96,3 +96,14 @@ A autenticação inicial para o sistema é feita via **Basic Auth**. O usuário 
 - **Senha**: `password`
 
 Isso é para criar o primeiro Client pelo endpoint. Depois disso vc pode pegar o número do Documento do Cliente e usar pra chamar o /auth e pegar o token!
+
+## 📁 Collection 
+
+Deixei a collection do postman para importação no diretótrio raiz
+
+## 🚀 Melhorias Futuras
+
+- Melhorar as regras de negócio
+- Aumentar cobertura de teste
+- Criar um @Schedule para ler a DeadLetterQueue e colocar as mensagens com erro para reprocessar
+- Integrar com o Graylog para visualizar logs de erro
